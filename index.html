@@ -14,10 +14,9 @@
 
     <script>
         document.getElementById("testBtn").addEventListener("click", () => {
-            // Send a GET request to an echo service that returns the request headers.
-            fetch("https://httpbin.org/headers", {
+            // Use a relative path if the gateway appends this to the base URL.
+            fetch("/echo/headers", {  
                 method: "GET"
-                // Note: Do not set the Authorization header manually.
             })
             .then(response => response.json())
             .then(data => {
