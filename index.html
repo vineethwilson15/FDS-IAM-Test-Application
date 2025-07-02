@@ -14,18 +14,18 @@
 
     <script>
         document.getElementById("testBtn").addEventListener("click", () => {
-            // Call a custom endpoint which has been configured in your FDS Gateway.
+            // The request will be routed by the FDS Gateway to the external echo endpoint.
             fetch("api/headers", {  
                 method: "GET"
             })
             .then(response => response.json())
             .then(data => {
                 document.getElementById("output").textContent =
-                      JSON.stringify(data.headers, null, 2);
+                    JSON.stringify(data.headers, null, 2);
             })
             .catch(error => {
                 document.getElementById("output").textContent =
-                      "Error: " + error;
+                    "Error: " + error;
             });
         });
     </script>
