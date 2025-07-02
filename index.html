@@ -5,19 +5,46 @@
   <title>FDS Gateway Bearer Token Test</title>
   <!-- Set base href as relative for FDS Gateway compatibility -->
   <base href="./">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; }
+    button { margin-right: 1em; }
+    pre { background: #f4f4f4; padding: 1em; border-radius: 4px; }
+    .info { margin-bottom: 2em; }
+  </style>
 </head>
 <body>
-  <h1>FDS Gateway Bearer Token Test</h1>
+  <div class="info">
+    <h1>FDS Gateway Bearer Token Test</h1>
+    <p>
+      This page demonstrates API calls through the FDS Gateway.<br>
+      <strong>Note:</strong> All API calls must include the web app prefix (e.g., <code>/tiaportalcloud-xcdev/</code>).
+    </p>
+    <p>
+      <strong>Current App Prefix:</strong>
+      <code id="prefix"></code>
+    </p>
+  </div>
   <button id="userBtn">Call /api/user</button>
   <button id="settingsBtn">Call /api/settings</button>
   <pre id="output"></pre>
   <script>
+    // Dynamically determine the app prefix from the current path
+    function getAppPrefix() {
+      // e.g., /tiaportalcloud-xcdev/...
+      const path = window.location.pathname;
+      const match = path.match(/^\/([^\/]+)\//);
+      return match ? `/${match[1]}` : '';
+    }
+
+    const apiPrefix = getAppPrefix();
+    document.getElementById('prefix').textContent = apiPrefix || '(none detected)';
+
     const output = document.getElementById('output');
 
     async function callApi(endpoint) {
-      output.textContent = `Calling ${endpoint}...`;
+      output.textContent = `Calling ${apiPrefix}${endpoint}...`;
       try {
-        const res = await fetch(endpoint, { credentials: 'include' });
+        const res = await fetch(`${apiPrefix}${endpoint}`, { credentials: 'include' });
         const data = await res.json();
         output.textContent = JSON.stringify(data, null, 2);
       } catch (err) {
@@ -27,6 +54,3 @@
 
     document.getElementById('userBtn').onclick = () => callApi('/api/user');
     document.getElementById('settingsBtn').onclick = () => callApi('/api/settings');
-  </script>
-</body>
-</html>
