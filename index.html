@@ -28,29 +28,33 @@
   <button id="settingsBtn">Call /api/settings</button>
   <pre id="output"></pre>
   <script>
-    // Dynamically determine the app prefix from the current path
-    function getAppPrefix() {
-      // e.g., /tiaportalcloud-xcdev/...
-      const path = window.location.pathname;
-      const match = path.match(/^\/([^\/]+)\//);
-      return match ? `/${match[1]}` : '';
-    }
-
-    const apiPrefix = getAppPrefix();
-    document.getElementById('prefix').textContent = apiPrefix || '(none detected)';
-
-    const output = document.getElementById('output');
-
-    async function callApi(endpoint) {
-      output.textContent = `Calling ${apiPrefix}${endpoint}...`;
-      try {
-        const res = await fetch(`${apiPrefix}${endpoint}`, { credentials: 'include' });
-        const data = await res.json();
-        output.textContent = JSON.stringify(data, null, 2);
-      } catch (err) {
-        output.textContent = 'Error: ' + err;
+    document.addEventListener('DOMContentLoaded', function() {
+      // Dynamically determine the app prefix from the current path
+      function getAppPrefix() {
+        // e.g., /tiaportalcloud-xcdev/...
+        const path = window.location.pathname;
+        const match = path.match(/^\/([^\/]+)\//);
+        return match ? `/${match[1]}` : '';
       }
-    }
 
-    document.getElementById('userBtn').onclick = () => callApi('/api/user');
-    document.getElementById('settingsBtn').onclick = () => callApi('/api/settings');
+      const apiPrefix = getAppPrefix();
+      document.getElementById('prefix').textContent = apiPrefix || '(none detected)';
+
+      const output = document.getElementById('output');
+
+      async function callApi(endpoint) {
+        output.textContent = `Calling ${apiPrefix}${endpoint}...`;
+        try {
+          const res = await fetch(`${apiPrefix}${endpoint}`, { credentials: 'include' });
+          const data = await res.json();
+          output.textContent = JSON.stringify(data, null, 2);
+        } catch (err) {
+          output.textContent = 'Error: ' + err;
+        }
+      }
+
+      document.getElementById('userBtn').onclick = () => callApi('/api/user');
+      document.getElementById('settingsBtn').onclick = () => callApi('/api/settings');
+    });
+  </script>
+</body>
