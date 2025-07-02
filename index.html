@@ -1,96 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>FDS Gateway Bearer Token Test</title>
-  <!-- Set base href as relative for FDS Gateway compatibility -->
-  <base href="./">
-  <style>
-    body { font-family: Arial, sans-serif; margin: 2em; }
-    button { margin-right: 1em; padding: 10px; }
-    pre { background: #f4f4f4; padding: 1em; border-radius: 4px; white-space: pre-wrap; }
-    .info { margin-bottom: 2em; }
-    .error { color: red; }
-    .success { color: green; }
-  </style>
+    <meta charset="UTF-8">
+    <title>FDS Gateway Authorization Header Test</title>
 </head>
 <body>
-  <div class="info">
-    <h1>FDS Gateway Bearer Token Test</h1>
+    <h1>FDS Gateway Header Test</h1>
     <p>
-      This page demonstrates API calls through the FDS Gateway.<br>
-      <strong>Note:</strong> All API calls must include the web app prefix.
+        Click the button below to send a request. When using the FDS Gateway, it will inject an Authorization header.
     </p>
-    <p>
-      <strong>Current URL:</strong> <code id="currentUrl"></code><br>
-      <strong>App Prefix:</strong> <code id="prefix"></code>
-    </p>
-  </div>
-  
-  <button id="userBtn">Call /api/user</button>
-  <button id="settingsBtn">Call /api/settings</button>
-  <button id="healthBtn">Call /api/health</button>
-  
-  <pre id="output">Click a button to make an API call...</pre>
-  
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Show current URL for debugging
-      document.getElementById('currentUrl').textContent = window.location.href;
-      
-      // Dynamically determine the app prefix from the current path
-      function getAppPrefix() {
-        const path = window.location.pathname;
-        const match = path.match(/^\/([^\/]+)\//);
-        return match ? `/${match[1]}` : '';
-      }
+    <button id="testBtn">Send Test Request</button>
+    <pre id="output"></pre>
 
-      const apiPrefix = getAppPrefix();
-      document.getElementById('prefix').textContent = apiPrefix || '(none detected - using empty prefix)';
-
-      const output = document.getElementById('output');
-
-      async function callApi(endpoint) {
-        const fullUrl = `${apiPrefix}${endpoint}`;
-        output.innerHTML = `<span class="info">Calling: ${fullUrl}</span>`;
-        
-        try {
-          const res = await fetch(fullUrl, { 
-            credentials: 'include',
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            }
-          });
-          
-          const responseText = await res.text();
-          
-          output.innerHTML = `<span class="info">Status: ${res.status} ${res.statusText}</span>
-URL: ${fullUrl}
-Response Headers: ${JSON.stringify(Object.fromEntries(res.headers.entries()), null, 2)}
-
-Response Body:
-${responseText}`;
-
-          // Try to parse as JSON if possible
-          try {
-            const jsonData = JSON.parse(responseText);
-            output.innerHTML += `\n\nParsed JSON:
-${JSON.stringify(jsonData, null, 2)}`;
-          } catch (e) {
-            output.innerHTML += `\n\n(Response is not valid JSON)`;
-          }
-          
-        } catch (err) {
-          output.innerHTML = `<span class="error">Network Error: ${err.message}</span>
-URL: ${fullUrl}`;
-        }
-      }
-
-      document.getElementById('userBtn').onclick = () => callApi('/api/user');
-      document.getElementById('settingsBtn').onclick = () => callApi('/api/settings');
-      document.getElementById('healthBtn').onclick = () => callApi('/api/health');
-    });
-  </script>
+    <script>
+        document.getElementById("testBtn").addEventListener("click", () => {
+            // Send a GET request to an echo service that returns the request headers.
+            fetch("https://httpbin.org/headers", {
+                method: "GET"
+                // Note: Do not set the Authorization header manually.
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("output").textContent =
+                    JSON.stringify(data.headers, null, 2);
+            })
+            .catch(error => {
+                document.getElementById("output").textContent =
+                    "Error: " + error;
+            });
+        });
+    </script>
 </body>
 </html>
