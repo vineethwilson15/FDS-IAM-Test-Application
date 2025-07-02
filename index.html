@@ -2,32 +2,78 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>FDS Gateway Authorization Header Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="./">
+    <title>FDS IAM Bearer Token Tester</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>FDS Gateway Header Test via Custom Routing</h1>
-    <p>
-        Click the button below to send a request. The FDS Gateway will intercept this request, inject the Authorization header, and route it to your configured API endpoint.
-    </p>
-    <button id="testBtn">Send Test Request</button>
-    <pre id="output"></pre>
+    <div class="container">
+        <header>
+            <h1>🔐 FDS IAM Bearer Token Tester</h1>
+            <p>Test if Bearer tokens are being appended to HTTP requests</p>
+        </header>
 
-    <script>
-        document.getElementById("testBtn").addEventListener("click", () => {
-            // The request will be routed by the FDS Gateway to the external echo endpoint.
-            fetch("api/headers", {  
-                method: "GET"
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("output").textContent =
-                    JSON.stringify(data.headers, null, 2);
-            })
-            .catch(error => {
-                document.getElementById("output").textContent =
-                    "Error: " + error;
-            });
-        });
-    </script>
+        <main>
+            <div class="test-section">
+                <h2>Test Configuration</h2>
+                <div class="config-form">
+                    <label for="testEndpoint">Test Endpoint URL:</label>
+                    <input type="text" id="testEndpoint" placeholder="https://your-api-endpoint.com/test" 
+                           value="https://httpbin.org/headers">
+                    
+                    <label for="requestMethod">HTTP Method:</label>
+                    <select id="requestMethod">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h2>Manual Token Testing</h2>
+                <div class="config-form">
+                    <label for="manualToken">Test with Manual Bearer Token:</label>
+                    <input type="text" id="manualToken" placeholder="Enter JWT token manually (optional)">
+                    <small>Leave empty to test automatic token injection by FDS Gateway</small>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button id="testRequest" class="btn-primary">🚀 Send Test Request</button>
+                <button id="clearResults" class="btn-secondary">🗑️ Clear Results</button>
+            </div>
+
+            <div class="results-section">
+                <h2>Test Results</h2>
+                <div id="requestInfo" class="info-box">
+                    <h3>Request Information</h3>
+                    <div id="requestDetails"></div>
+                </div>
+
+                <div id="responseInfo" class="info-box">
+                    <h3>Response</h3>
+                    <div id="responseDetails"></div>
+                </div>
+
+                <div id="tokenInfo" class="info-box">
+                    <h3>Bearer Token Analysis</h3>
+                    <div id="tokenDetails"></div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>FDS IAM Integration Test Tool | 
+               <a href="https://xcdev.us1.sws.siemens.com/tiaportalcloud-xcdev/" target="_blank">
+                   FDS Gateway URL
+               </a>
+            </p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

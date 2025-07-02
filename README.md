@@ -1,62 +1,112 @@
-# FDS IAM Test Application
+# FDS IAM Bearer Token Tester
 
-A simple test application to verify FDS Gateway integration and Authorization header handling.
+A simple web application to test if Bearer tokens are being properly appended to HTTP request headers when using Foundational Services (FDS) IAM with the Gateway integration.
 
-## 🚀 Quick Start
+## 🎯 Purpose
 
-1. Fork this repository
-2. Enable GitHub Pages in repository settings
-3. Visit your GitHub Pages URL to test the application
+This tool helps developers verify that:
+- FDS Gateway is properly injecting `Authorization: Bearer <JWT>` headers
+- JWT tokens are valid and contain expected user information
+- The application is correctly receiving authenticated requests
 
-## 🧪 Testing Features
+## 🚀 Features
 
-- **Authorization Header Detection**: Simulates how your app would receive JWT tokens from FDS Gateway
-- **Base Href Validation**: Tests that `base href="./"` works correctly for subdirectory deployment
-- **JWT Token Parsing**: Basic JWT validation (signature verification would be done server-side)
-- **Path Resolution**: Verifies relative paths work correctly
+- **Real-time Token Testing**: Send HTTP requests and analyze if Bearer tokens are present
+- **JWT Analysis**: Automatically detects and analyzes JWT token structure
+- **Multiple HTTP Methods**: Test with GET, POST, PUT, DELETE requests
+- **Manual Token Testing**: Option to test with manually provided tokens
+- **Beautiful UI**: Modern, responsive interface with clear results display
+- **GitHub Pages Ready**: Configured for easy deployment to GitHub Pages
 
-## 📋 What This Tests
+## 📋 How to Use
 
-### Base Href Configuration
-The app uses `<base href="./">` as recommended in the FDS documentation to ensure proper path resolution when deployed under a subdirectory path like `/{webApp}/`.
+1. **Deploy to GitHub Pages**:
+   - Create a new GitHub repository
+   - Upload these files to the repository
+   - Enable GitHub Pages in repository settings
+   - Access your app at `https://yourusername.github.io/repository-name`
 
-### Authorization Header Simulation
-While browsers don't expose request headers to JavaScript, this app simulates what your server-side code would receive from the FDS Gateway:
+2. **Configure for FDS Gateway**:
+   - Deploy the app behind the FDS Gateway at your configured URL
+   - The Gateway should automatically inject Bearer tokens
+   - Test using the web interface
+
+3. **Test Bearer Token Injection**:
+   - Enter a test endpoint URL (default: `https://httpbin.org/headers`)
+   - Click "Send Test Request"
+   - Analyze the results to see if Bearer token is present
+
+## 🔧 Configuration
+
+The app is pre-configured with:
+- **Base href**: Set to `./` for subdirectory hosting (required for FDS Gateway)
+- **CORS handling**: Properly configured for cross-origin requests
+- **Default test endpoint**: httpbin.org/headers (shows all request headers)
+
+## 📁 File Structure
+
 ```
-Authorization: Bearer <JWT_TOKEN>
+├── index.html          # Main HTML file with form and results display
+├── styles.css          # Modern CSS styling with responsive design
+├── script.js           # JavaScript logic for testing and analysis
+└── README.md          # This documentation file
 ```
 
-### JWT Token Structure
-Tests parsing of JWT tokens with typical FDS IAM payload:
-```json
-{
-  "sub": "user-id",
-  "tenant": "tenant-name",
-  "roles": ["user", "admin"],
-  "permissions": ["read", "write"],
-  "exp": 1234567890
-}
-```
+## 🧪 Testing Scenarios
 
-## 🔧 Usage
+1. **Automatic Token Injection** (FDS Gateway):
+   - Deploy behind FDS Gateway
+   - Leave "Manual Bearer Token" field empty
+   - Send request to see if Gateway injects the token
 
-1. **Check Headers**: View simulated request headers
-2. **Simulate Gateway**: Test with mock JWT token
-3. **Custom Token**: Test with your own JWT token
-4. **Path Test**: Verify relative path resolution
+2. **Manual Token Testing**:
+   - Enter a JWT token in the "Manual Bearer Token" field
+   - Verify the token is properly included in requests
+
+3. **Different HTTP Methods**:
+   - Test with GET, POST, PUT, DELETE methods
+   - Verify token injection works for all methods
+
+## 🔍 Understanding Results
+
+The app displays three sections of results:
+
+1. **Request Information**: Shows the request details being sent
+2. **Response**: Shows the server response and headers
+3. **Bearer Token Analysis**: Analyzes if a Bearer token was found and provides JWT details
+
+## 🌐 FDS Gateway Integration
+
+When deployed behind the FDS Gateway (at your configured URL like `https://xcdev.us1.sws.siemens.com/tiaportalcloud-xcdev/`), the Gateway should automatically:
+
+- Handle user authentication
+- Inject `Authorization: Bearer <JWT>` header
+- Forward requests to your application endpoints
+- Include user, tenant, and permission information in the JWT
+
+## 🛠️ Troubleshooting
+
+**No Bearer token found?**
+- Verify the app is deployed behind FDS Gateway
+- Check if the Gateway is properly configured
+- Ensure user is authenticated with SiemensID
+
+**CORS errors?**
+- Use endpoints that support CORS (like httpbin.org)
+- Ensure your test endpoints allow cross-origin requests
+
+**JWT parsing errors?**
+- Verify the token is a valid JWT (3 parts separated by dots)
+- Check if the token is properly base64 encoded
 
 ## 📝 Notes
 
-- This is a client-side only demo for GitHub Pages compatibility
-- Real JWT signature validation must be done server-side against IAM's public key
-- The Authorization header would be automatically added by the FDS Gateway in production
+- The `base href="./"` setting is crucial for proper operation behind FDS Gateway
+- All JWT content is masked in the UI for security purposes
+- The app includes debug utilities accessible via browser console (`window.FDSTest`)
 
-## 🔗 Deployment
+## 🔗 Related Links
 
-Deploy to GitHub Pages:
-1. Go to repository Settings → Pages  
-2. Select "Deploy from a branch"
-3. Choose "main" branch and "/ (root)" folder
-4. Your app will be available at `https://yourusername.github.io/repository-name/`
-
-This tests the exact scenario described in the FDS documentation where your app runs under a subdirectory path.
+- [FDS IAM Documentation](https://your-fds-docs-link)
+- [Your FDS Gateway URL](https://xcdev.us1.sws.siemens.com/tiaportalcloud-xcdev/)
+- [HTTPBin.org](https://httpbin.org) - Useful for testing HTTP requests
