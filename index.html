@@ -5,27 +5,27 @@
     <title>FDS Gateway Authorization Header Test</title>
 </head>
 <body>
-    <h1>FDS Gateway Header Test</h1>
+    <h1>FDS Gateway Header Test via Custom Routing</h1>
     <p>
-        Click the button below to send a request. When using the FDS Gateway, it will inject an Authorization header.
+        Click the button below to send a request. The FDS Gateway will intercept this request, inject the Authorization header, and route it to your configured API endpoint.
     </p>
     <button id="testBtn">Send Test Request</button>
     <pre id="output"></pre>
 
     <script>
         document.getElementById("testBtn").addEventListener("click", () => {
-            // Use a relative path (without a leading slash) so it’s appended to /tiaportalcloud-xcdev/
-            fetch("echo/headers", {  
+            // Call a custom endpoint which has been configured in your FDS Gateway.
+            fetch("api/headers", {  
                 method: "GET"
             })
             .then(response => response.json())
             .then(data => {
                 document.getElementById("output").textContent =
-                    JSON.stringify(data.headers, null, 2);
+                      JSON.stringify(data.headers, null, 2);
             })
             .catch(error => {
                 document.getElementById("output").textContent =
-                    "Error: " + error;
+                      "Error: " + error;
             });
         });
     </script>
