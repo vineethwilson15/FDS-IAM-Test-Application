@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>FDS Gateway Bearer Token Test</title>
+  <!-- Set base href as relative for FDS Gateway compatibility -->
+  <base href="./">
 </head>
 <body>
   <h1>FDS Gateway Bearer Token Test</h1>
@@ -26,3 +28,5 @@
     document.getElementById('userBtn').onclick = () => callApi('/api/user');
     document.getElementById('settingsBtn').onclick = () => callApi('/api/settings');
   </script>
+</body>
+</html>
