@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FDS IAM Gateway Tester</title>
+    <title>FDS IAM Gateway Header Tester</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -97,56 +97,32 @@
             border-left: 4px solid #007bff;
             font-size: 13px;
             line-height: 1.4;
+            max-height: 400px;
+            overflow-y: auto;
         }
         
-        .jwt-input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 12px;
-            resize: vertical;
-            min-height: 100px;
-        }
-        
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin: 15px 0;
-        }
-        
-        .info-card {
+        .api-result {
             background: #f8f9fa;
             padding: 15px;
             border-radius: 6px;
-            border-left: 4px solid #007bff;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: #e0e0e0;
-            border-radius: 2px;
-            overflow: hidden;
             margin: 10px 0;
+            border-left: 4px solid #28a745;
         }
         
-        .progress-fill {
-            height: 100%;
-            background: #007bff;
-            width: 0%;
-            transition: width 0.3s ease;
+        .api-error {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border-left: 4px solid #dc3545;
         }
         
-        .webhook-url {
+        .header-test {
             background: #e8f4fd;
             padding: 15px;
             border-radius: 6px;
+            margin: 10px 0;
             border: 1px solid #bee5eb;
-            margin: 15px 0;
-            word-break: break-all;
         }
         
         .test-results {
@@ -157,119 +133,191 @@
             padding: 15px;
             background: #fafafa;
         }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .endpoint-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .endpoint-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        
+        .endpoint-card h5 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .endpoint-card p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .endpoint-card button {
+            width: 100%;
+            margin: 5px 0;
+            padding: 8px;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔐 FDS IAM Gateway Tester</h1>
-        <p class="subtitle">Comprehensive testing tool for FDS Gateway integration</p>
+        <h1>🔐 FDS IAM Header Verification Tool</h1>
+        <p class="subtitle">Test if FDS Gateway is adding Authorization headers to your requests</p>
         
-        <!-- Test 1: Environment Analysis -->
-        <div class="test-section" id="envSection">
-            <span class="status-badge status-pending">PENDING</span>
-            <h3>🌍 Environment Analysis</h3>
-            <p>Analyzing current environment for FDS Gateway integration readiness.</p>
-            <div class="button-group">
-                <button onclick="analyzeEnvironment()">Analyze Environment</button>
-                <button onclick="checkSecurityHeaders()">Check Security Headers</button>
+        <!-- Real API Header Testing -->
+        <div class="test-section" id="apiSection">
+            <span class="status-badge status-pending">READY</span>
+            <h3>🌐 Public API Header Testing</h3>
+            <p>Test real API calls to see if Authorization headers are being added by FDS Gateway</p>
+            
+            <div class="header-test">
+                <h4>🎯 How This Works:</h4>
+                <ul>
+                    <li>When you're behind FDS Gateway, it should add <code>Authorization: Bearer &lt;JWT&gt;</code> to all outbound requests</li>
+                    <li>We'll call public APIs that echo back the headers they receive</li>
+                    <li>If you see Authorization headers in the response, FDS Gateway is working!</li>
+                    <li>If no Authorization headers appear, you might not be behind the Gateway</li>
+                </ul>
             </div>
-            <div id="envResults"></div>
-        </div>
-
-        <!-- Test 2: JWT Token Testing -->
-        <div class="test-section" id="jwtSection">
-            <span class="status-badge status-pending">PENDING</span>
-            <h3>🎫 JWT Token Validation</h3>
-            <p>Test JWT token decoding and validation (paste your JWT token below).</p>
-            <textarea class="jwt-input" id="jwtInput" placeholder="Paste your JWT token here...
-Example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"></textarea>
-            <div class="button-group">
-                <button onclick="validateJWT()">Validate JWT Token</button>
-                <button onclick="generateTestJWT()">Generate Test JWT</button>
-                <button onclick="clearJWT()">Clear</button>
-            </div>
-            <div id="jwtResults"></div>
-        </div>
-
-        <!-- Test 3: HTTP Headers Simulation -->
-        <div class="test-section" id="headerSection">
-            <span class="status-badge status-pending">PENDING</span>
-            <h3>📡 HTTP Headers Simulation</h3>
-            <p>Simulate and test HTTP headers that would be sent by FDS Gateway.</p>
-            <div class="button-group">
-                <button onclick="simulateGatewayHeaders()">Simulate Gateway Headers</button>
-                <button onclick="testCORS()">Test CORS</button>
-                <button onclick="testWebhook()">Test Webhook Endpoint</button>
-            </div>
-            <div id="headerResults"></div>
-        </div>
-
-        <!-- Test 4: Integration Test -->
-        <div class="test-section" id="integrationSection">
-            <span class="status-badge status-pending">PENDING</span>
-            <h3>🔗 Integration Test</h3>
-            <p>Comprehensive integration test using external services.</p>
-            <div class="webhook-url" id="webhookUrl" style="display: none;">
-                <strong>Webhook URL:</strong> <span id="webhookUrlText"></span>
-                <button onclick="copyWebhookUrl()">Copy URL</button>
-            </div>
-            <div class="button-group">
-                <button onclick="startIntegrationTest()">Start Integration Test</button>
-                <button onclick="generateWebhookUrl()">Generate Webhook URL</button>
-                <button onclick="testFullFlow()">Test Full Flow</button>
-            </div>
-            <div class="progress-bar" id="progressBar" style="display: none;">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-            <div id="integrationResults"></div>
-        </div>
-
-        <!-- Test Results Summary -->
-        <div class="test-section">
-            <h3>📊 Test Results Summary</h3>
-            <div class="info-grid" id="summaryGrid">
-                <div class="info-card">
-                    <h4>Environment</h4>
-                    <div id="envStatus">Not tested</div>
+            
+            <div class="endpoint-list">
+                <div class="endpoint-card">
+                    <h5>🐕 Dog API</h5>
+                    <p>URL: https://dog.ceo/api/breeds/image/random</p>
+                    <p>Returns: Random dog image</p>
+                    <button onclick="testDogAPI()">Test Dog API</button>
                 </div>
-                <div class="info-card">
-                    <h4>JWT Validation</h4>
-                    <div id="jwtStatus">Not tested</div>
+                
+                <div class="endpoint-card">
+                    <h5>📡 HTTPBin Headers</h5>
+                    <p>URL: https://httpbin.org/headers</p>
+                    <p>Returns: All request headers</p>
+                    <button onclick="testHTTPBinHeaders()">Test Headers Echo</button>
                 </div>
-                <div class="info-card">
-                    <h4>Headers</h4>
-                    <div id="headerStatus">Not tested</div>
+                
+                <div class="endpoint-card">
+                    <h5>🔍 HTTPBin Get</h5>
+                    <p>URL: https://httpbin.org/get</p>
+                    <p>Returns: Complete request info</p>
+                    <button onclick="testHTTPBinGet()">Test Full Request</button>
                 </div>
-                <div class="info-card">
-                    <h4>Integration</h4>
-                    <div id="integrationStatus">Not tested</div>
+                
+                <div class="endpoint-card">
+                    <h5>📝 JSONPlaceholder</h5>
+                    <p>URL: https://jsonplaceholder.typicode.com/posts/1</p>
+                    <p>Returns: Sample post data</p>
+                    <button onclick="testJSONPlaceholder()">Test JSON API</button>
+                </div>
+                
+                <div class="endpoint-card">
+                    <h5>🎭 ReqRes.in</h5>
+                    <p>URL: https://reqres.in/api/users</p>
+                    <p>Returns: User data + headers</p>
+                    <button onclick="testReqRes()">Test ReqRes API</button>
+                </div>
+                
+                <div class="endpoint-card">
+                    <h5>🌟 Custom Test</h5>
+                    <p>Enter your own API endpoint</p>
+                    <input type="text" id="customUrl" placeholder="https://your-api.com/endpoint" style="width: 100%; padding: 5px; margin: 5px 0;">
+                    <button onclick="testCustomAPI()">Test Custom API</button>
                 </div>
             </div>
+            
+            <div class="button-group">
+                <button onclick="testAllAPIs()">🚀 Test All APIs</button>
+                <button onclick="testWithCustomHeaders()">🔧 Test with Custom Headers</button>
+                <button onclick="clearAPIResults()">🧹 Clear Results</button>
+            </div>
+            
+            <div id="apiResults"></div>
         </div>
 
-        <!-- Debug Console -->
-        <div class="test-section">
-            <h3>🐛 Debug Console</h3>
-            <div class="test-results" id="debugConsole">
-                <div>Debug console initialized...</div>
+        <!-- Manual Header Inspection -->
+        <div class="test-section" id="manualSection">
+            <span class="status-badge status-pending">READY</span>
+            <h3>🔍 Manual Header Inspection</h3>
+            <p>Manually inspect what headers are being sent with your requests</p>
+            
+            <div class="header-test">
+                <h4>🎯 Instructions:</h4>
+                <ol>
+                    <li>Open your browser's Developer Tools (F12)</li>
+                    <li>Go to the Network tab</li>
+                    <li>Click "Test Network Request" below</li>
+                    <li>Look for the request in the Network tab</li>
+                    <li>Check the Request Headers for "Authorization: Bearer ..."</li>
+                </ol>
             </div>
+            
             <div class="button-group">
-                <button onclick="clearDebugConsole()">Clear Console</button>
-                <button onclick="exportResults()">Export Results</button>
+                <button onclick="testNetworkRequest()">🌐 Test Network Request</button>
+                <button onclick="testWithFetch()">📡 Test with Fetch API</button>
+                <button onclick="testWithXHR()">🔄 Test with XMLHttpRequest</button>
+            </div>
+            
+            <div id="manualResults"></div>
+        </div>
+
+        <!-- FDS Gateway Detection -->
+        <div class="test-section" id="gatewaySection">
+            <span class="status-badge status-pending">READY</span>
+            <h3>🚪 FDS Gateway Detection</h3>
+            <p>Detect if you're currently behind the FDS Gateway</p>
+            
+            <div class="button-group">
+                <button onclick="detectGateway()">🔍 Detect Gateway</button>
+                <button onclick="checkEnvironment()">🌍 Check Environment</button>
+                <button onclick="testGatewayFeatures()">⚡ Test Gateway Features</button>
+            </div>
+            
+            <div id="gatewayResults"></div>
+        </div>
+
+        <!-- Real-time Header Monitor -->
+        <div class="test-section" id="monitorSection">
+            <span class="status-badge status-pending">READY</span>
+            <h3>📊 Real-time Header Monitor</h3>
+            <p>Monitor headers in real-time as you make requests</p>
+            
+            <div class="button-group">
+                <button onclick="startMonitoring()">▶️ Start Monitoring</button>
+                <button onclick="stopMonitoring()">⏹️ Stop Monitoring</button>
+                <button onclick="clearMonitor()">🧹 Clear Monitor</button>
+            </div>
+            
+            <div class="test-results" id="headerMonitor">
+                <div>Header monitor ready... Click "Start Monitoring" to begin</div>
             </div>
         </div>
     </div>
 
     <script>
-        // Debug logging
-        function debugLog(message, type = 'info') {
-            const console = document.getElementById('debugConsole');
-            const timestamp = new Date().toISOString();
-            const logEntry = document.createElement('div');
-            logEntry.innerHTML = `<span style="color: #666; font-size: 11px;">[${timestamp}]</span> <span style="color: ${type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : '#007bff'};">${message}</span>`;
-            console.appendChild(logEntry);
-            console.scrollTop = console.scrollHeight;
-        }
+        let monitoring = false;
+        let monitorInterval;
 
         // Update section status
         function updateSectionStatus(sectionId, status) {
@@ -281,480 +329,512 @@ Example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZS
             badge.textContent = status.toUpperCase();
         }
 
-        // Update summary status
-        function updateSummaryStatus(type, status) {
-            const statusElement = document.getElementById(`${type}Status`);
-            statusElement.textContent = status;
-            statusElement.style.color = status.includes('✅') ? '#28a745' : 
-                                      status.includes('⚠️') ? '#ffc107' : 
-                                      status.includes('❌') ? '#dc3545' : '#6c757d';
+        // Log to results
+        function logResult(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = type === 'error' ? 'api-error' : 'api-result';
+            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            container.appendChild(logEntry);
+            container.scrollTop = container.scrollHeight;
         }
 
-        // Environment Analysis
-        function analyzeEnvironment() {
-            debugLog('Starting environment analysis...');
-            updateSectionStatus('envSection', 'warning');
+        // Test Dog API
+        async function testDogAPI() {
+            logResult('apiResults', '🐕 Testing Dog API... <span class="loading"></span>');
             
-            const results = document.getElementById('envResults');
-            const analysis = {
-                protocol: window.location.protocol,
-                host: window.location.host,
-                userAgent: navigator.userAgent,
-                languages: navigator.languages.join(', '),
-                cookieEnabled: navigator.cookieEnabled,
-                onLine: navigator.onLine,
-                referrer: document.referrer || 'Direct access'
-            };
-            
-            let html = '<h4>Environment Analysis Results:</h4>';
-            html += '<div class="info-grid">';
-            
-            Object.entries(analysis).forEach(([key, value]) => {
-                html += `<div class="info-card">
-                    <strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong><br>
-                    ${value}
-                </div>`;
-            });
-            
-            html += '</div>';
-            html += '<h5>FDS Gateway Compatibility:</h5>';
-            html += '<ul>';
-            html += analysis.protocol === 'https:' ? 
-                '<li>✅ HTTPS protocol - Compatible with FDS Gateway</li>' : 
-                '<li>⚠️ HTTP protocol - FDS Gateway requires HTTPS in production</li>';
-            html += analysis.cookieEnabled ? 
-                '<li>✅ Cookies enabled - Session management will work</li>' : 
-                '<li>❌ Cookies disabled - Session management may fail</li>';
-            html += '</ul>';
-            
-            results.innerHTML = html;
-            updateSectionStatus('envSection', 'success');
-            updateSummaryStatus('env', '✅ Analyzed');
-            debugLog('Environment analysis completed', 'success');
+            try {
+                const response = await fetch('https://dog.ceo/api/breeds/image/random');
+                const data = await response.json();
+                
+                // Check response headers
+                const headers = {};
+                for (let [key, value] of response.headers.entries()) {
+                    headers[key] = value;
+                }
+                
+                logResult('apiResults', `
+                    <h5>🐕 Dog API Response:</h5>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Response:</strong> ${JSON.stringify(data, null, 2)}</p>
+                    <p><strong>Response Headers:</strong></p>
+                    <pre>${JSON.stringify(headers, null, 2)}</pre>
+                    <p><strong>Authorization Header Check:</strong> ${headers.authorization || headers.Authorization ? '✅ Found!' : '❌ Not found in response headers'}</p>
+                    <p><em>Note: This API doesn't echo request headers back. Use HTTPBin for header inspection.</em></p>
+                `);
+                
+                updateSectionStatus('apiSection', 'success');
+            } catch (error) {
+                logResult('apiResults', `❌ Dog API Error: ${error.message}`, 'error');
+                updateSectionStatus('apiSection', 'error');
+            }
         }
 
-        // Security Headers Check
-        function checkSecurityHeaders() {
-            debugLog('Checking security headers...');
+        // Test HTTPBin Headers (This will show us the actual headers sent)
+        async function testHTTPBinHeaders() {
+            logResult('apiResults', '📡 Testing HTTPBin Headers... <span class="loading"></span>');
             
-            fetch(window.location.href, { method: 'HEAD' })
-                .then(response => {
-                    const headers = {};
-                    for (let [key, value] of response.headers.entries()) {
-                        headers[key] = value;
+            try {
+                const response = await fetch('https://httpbin.org/headers');
+                const data = await response.json();
+                
+                const hasAuthHeader = data.headers && (data.headers.Authorization || data.headers.authorization);
+                
+                logResult('apiResults', `
+                    <h5>📡 HTTPBin Headers Response:</h5>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Your Request Headers (as seen by the server):</strong></p>
+                    <pre>${JSON.stringify(data.headers, null, 2)}</pre>
+                    <div style="background: ${hasAuthHeader ? '#d4edda' : '#f8d7da'}; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        <strong>🔐 Authorization Header Status:</strong> 
+                        ${hasAuthHeader ? 
+                            `✅ FOUND! Authorization: ${data.headers.Authorization || data.headers.authorization}` : 
+                            '❌ NOT FOUND - You may not be behind FDS Gateway'
+                        }
+                    </div>
+                    ${hasAuthHeader ? 
+                        '<p>🎉 <strong>Success!</strong> FDS Gateway is adding Authorization headers to your requests.</p>' :
+                        '<p>⚠️ <strong>No Authorization header detected.</strong> This could mean:</p><ul><li>You\'re not behind FDS Gateway</li><li>FDS Gateway is not configured for this domain</li><li>You\'re testing from localhost/development</li></ul>'
                     }
-                    
-                    const securityHeaders = [
-                        'strict-transport-security',
-                        'x-frame-options',
-                        'x-content-type-options',
-                        'content-security-policy',
-                        'x-xss-protection'
-                    ];
-                    
-                    let html = '<h5>Security Headers Analysis:</h5><ul>';
-                    securityHeaders.forEach(header => {
-                        const present = headers[header] || headers[header.toLowerCase()];
-                        html += `<li>${present ? '✅' : '❌'} ${header}: ${present || 'Not present'}</li>`;
-                    });
-                    html += '</ul>';
-                    
-                    document.getElementById('envResults').innerHTML += html;
-                    debugLog('Security headers check completed', 'success');
-                })
-                .catch(error => {
-                    debugLog(`Security headers check failed: ${error.message}`, 'error');
-                });
+                `);
+                
+                updateSectionStatus('apiSection', hasAuthHeader ? 'success' : 'warning');
+            } catch (error) {
+                logResult('apiResults', `❌ HTTPBin Headers Error: ${error.message}`, 'error');
+                updateSectionStatus('apiSection', 'error');
+            }
         }
 
-        // JWT Validation
-        function validateJWT() {
-            const token = document.getElementById('jwtInput').value.trim();
-            if (!token) {
-                debugLog('No JWT token provided', 'error');
+        // Test HTTPBin Get (Full request info)
+        async function testHTTPBinGet() {
+            logResult('apiResults', '🔍 Testing HTTPBin Get... <span class="loading"></span>');
+            
+            try {
+                const response = await fetch('https://httpbin.org/get');
+                const data = await response.json();
+                
+                const hasAuthHeader = data.headers && (data.headers.Authorization || data.headers.authorization);
+                
+                logResult('apiResults', `
+                    <h5>🔍 HTTPBin Get Response:</h5>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Request URL:</strong> ${data.url}</p>
+                    <p><strong>Request Headers:</strong></p>
+                    <pre>${JSON.stringify(data.headers, null, 2)}</pre>
+                    <p><strong>Request Args:</strong></p>
+                    <pre>${JSON.stringify(data.args, null, 2)}</pre>
+                    <div style="background: ${hasAuthHeader ? '#d4edda' : '#f8d7da'}; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        <strong>🔐 Authorization Header:</strong> 
+                        ${hasAuthHeader ? 
+                            `✅ ${data.headers.Authorization || data.headers.authorization}` : 
+                            '❌ No Authorization header found'
+                        }
+                    </div>
+                `);
+                
+                updateSectionStatus('apiSection', hasAuthHeader ? 'success' : 'warning');
+            } catch (error) {
+                logResult('apiResults', `❌ HTTPBin Get Error: ${error.message}`, 'error');
+                updateSectionStatus('apiSection', 'error');
+            }
+        }
+
+        // Test JSONPlaceholder
+        async function testJSONPlaceholder() {
+            logResult('apiResults', '📝 Testing JSONPlaceholder... <span class="loading"></span>');
+            
+            try {
+                const response = await fetch('https://jsonplaceholder.typicode.com/posts/1');
+                const data = await response.json();
+                
+                logResult('apiResults', `
+                    <h5>📝 JSONPlaceholder Response:</h5>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Response:</strong></p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                    <p><em>Note: This API doesn't echo request headers. Check browser DevTools Network tab to see actual headers sent.</em></p>
+                `);
+                
+                updateSectionStatus('apiSection', 'success');
+            } catch (error) {
+                logResult('apiResults', `❌ JSONPlaceholder Error: ${error.message}`, 'error');
+                updateSectionStatus('apiSection', 'error');
+            }
+        }
+
+        // Test ReqRes.in
+        async function testReqRes() {
+            logResult('apiResults', '🎭 Testing ReqRes.in... <span class="loading"></span>');
+            
+            try {
+                const response = await fetch('https://reqres.in/api/users?page=1');
+                const data = await response.json();
+                
+                logResult('apiResults', `
+                    <h5>🎭 ReqRes.in Response:</h5>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Response:</strong></p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                    <p><em>Note: This API doesn't echo request headers. Use HTTPBin for header inspection.</em></p>
+                `);
+                
+                updateSectionStatus('apiSection', 'success');
+            } catch (error) {
+                logResult('apiResults', `❌ ReqRes.in Error: ${error.message}`, 'error');
+                updateSectionStatus('apiSection', 'error');
+            }
+        }
+
+        // Test Custom API
+        async function testCustomAPI() {
+            const url = document.getElementById('customUrl').value.trim();
+            if (!url) {
+                logResult('apiResults', '❌ Please enter a custom API URL', 'error');
                 return;
             }
             
-            debugLog('Validating JWT token...');
-            updateSectionStatus('jwtSection', 'warning');
+            logResult('apiResults', `🌟 Testing Custom API: ${url}... <span class="loading"></span>`);
             
             try {
-                const decoded = decodeJWT(token);
-                if (decoded.error) {
-                    throw new Error(decoded.error);
-                }
+                const response = await fetch(url);
+                const data = await response.json();
                 
-                let html = '<h4>JWT Validation Results:</h4>';
-                html += '<div class="info-grid">';
+                logResult('apiResults', `
+                    <h5>🌟 Custom API Response:</h5>
+                    <p><strong>URL:</strong> ${url}</p>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Response:</strong></p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `);
                 
-                // Header analysis
-                html += '<div class="info-card">';
-                html += '<h5>Header:</h5>';
-                html += `<pre>${JSON.stringify(decoded.header, null, 2)}</pre>`;
-                html += '</div>';
-                
-                // Payload analysis
-                html += '<div class="info-card">';
-                html += '<h5>Payload:</h5>';
-                html += `<pre>${JSON.stringify(decoded.payload, null, 2)}</pre>`;
-                html += '</div>';
-                
-                html += '</div>';
-                
-                // FDS-specific fields
-                html += '<h5>FDS IAM Fields:</h5>';
-                html += '<ul>';
-                html += `<li><strong>Tenant (ECA):</strong> ${decoded.payload.tenant || decoded.payload.eca || 'Not specified'}</li>`;
-                html += `<li><strong>User:</strong> ${decoded.payload.sub || decoded.payload.user || decoded.payload.email || 'Not specified'}</li>`;
-                html += `<li><strong>Roles:</strong> ${JSON.stringify(decoded.payload.roles || decoded.payload.role || 'Not specified')}</li>`;
-                html += `<li><strong>Permissions:</strong> ${JSON.stringify(decoded.payload.permissions || decoded.payload.perms || 'Not specified')}</li>`;
-                html += `<li><strong>Issued At:</strong> ${decoded.payload.iat ? new Date(decoded.payload.iat * 1000).toISOString() : 'Not specified'}</li>`;
-                html += `<li><strong>Expires At:</strong> ${decoded.payload.exp ? new Date(decoded.payload.exp * 1000).toISOString() : 'Not specified'}</li>`;
-                html += '</ul>';
-                
-                // Token validation
-                html += '<h5>Token Validation:</h5>';
-                html += '<ul>';
-                html += decoded.payload.exp ? 
-                    (decoded.payload.exp * 1000 > Date.now() ? 
-                        '<li>✅ Token is not expired</li>' : 
-                        '<li>❌ Token is expired</li>') : 
-                    '<li>⚠️ No expiration time specified</li>';
-                html += decoded.payload.iat ? 
-                    '<li>✅ Token has issued timestamp</li>' : 
-                    '<li>⚠️ No issued timestamp</li>';
-                html += '</ul>';
-                
-                document.getElementById('jwtResults').innerHTML = html;
-                updateSectionStatus('jwtSection', 'success');
-                updateSummaryStatus('jwt', '✅ Valid');
-                debugLog('JWT validation completed successfully', 'success');
-                
+                updateSectionStatus('apiSection', 'success');
             } catch (error) {
-                const errorHtml = `<div class="error">
-                    <h4>JWT Validation Error</h4>
-                    <p>${error.message}</p>
-                    <p><strong>Tip:</strong> Make sure you've pasted a complete JWT token (should have 3 parts separated by dots)</p>
-                </div>`;
-                document.getElementById('jwtResults').innerHTML = errorHtml;
-                updateSectionStatus('jwtSection', 'error');
-                updateSummaryStatus('jwt', '❌ Invalid');
-                debugLog(`JWT validation failed: ${error.message}`, 'error');
+                logResult('apiResults', `❌ Custom API Error: ${error.message}`, 'error');
+                updateSectionStatus('apiSection', 'error');
             }
         }
 
-        // Generate Test JWT
-        function generateTestJWT() {
-            debugLog('Generating test JWT token...');
+        // Test All APIs
+        async function testAllAPIs() {
+            logResult('apiResults', '🚀 Testing all APIs...');
+            updateSectionStatus('apiSection', 'warning');
             
-            const header = {
-                "alg": "HS256",
-                "typ": "JWT"
-            };
+            await testHTTPBinHeaders();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await testHTTPBinGet();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await testDogAPI();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await testJSONPlaceholder();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await testReqRes();
             
-            const payload = {
-                "sub": "test-user-123",
-                "name": "Test User",
-                "tenant": "example-tenant",
-                "eca": "example-eca",
-                "roles": ["user", "viewer"],
-                "permissions": ["read", "write"],
-                "email": "test@example.com",
-                "iat": Math.floor(Date.now() / 1000),
-                "exp": Math.floor(Date.now() / 1000) + (60 * 60) // 1 hour
-            };
-            
-            const encodedHeader = btoa(JSON.stringify(header)).replace(/=/g, '');
-            const encodedPayload = btoa(JSON.stringify(payload)).replace(/=/g, '');
-            const signature = "test-signature-not-real";
-            
-            const testJWT = `${encodedHeader}.${encodedPayload}.${signature}`;
-            
-            document.getElementById('jwtInput').value = testJWT;
-            debugLog('Test JWT generated successfully', 'success');
-            
-            // Auto-validate the generated token
-            validateJWT();
+            logResult('apiResults', '✅ All API tests completed!');
         }
 
-        // Clear JWT
-        function clearJWT() {
-            document.getElementById('jwtInput').value = '';
-            document.getElementById('jwtResults').innerHTML = '';
-            updateSectionStatus('jwtSection', 'pending');
-            updateSummaryStatus('jwt', 'Not tested');
-            debugLog('JWT input cleared');
+        // Test with Custom Headers
+        async function testWithCustomHeaders() {
+            logResult('apiResults', '🔧 Testing with custom headers... <span class="loading"></span>');
+            
+            try {
+                const response = await fetch('https://httpbin.org/headers', {
+                    headers: {
+                        'X-Test-Header': 'FDS-IAM-Test',
+                        'X-Custom-Auth': 'Bearer custom-token',
+                        'User-Agent': 'FDS-IAM-Tester/1.0'
+                    }
+                });
+                const data = await response.json();
+                
+                logResult('apiResults', `
+                    <h5>🔧 Custom Headers Test:</h5>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Headers sent to server:</strong></p>
+                    <pre>${JSON.stringify(data.headers, null, 2)}</pre>
+                    <p><strong>Custom headers check:</strong></p>
+                    <ul>
+                        <li>X-Test-Header: ${data.headers['X-Test-Header'] ? '✅ Found' : '❌ Not found'}</li>
+                        <li>X-Custom-Auth: ${data.headers['X-Custom-Auth'] ? '✅ Found' : '❌ Not found'}</li>
+                        <li>Authorization (from FDS): ${data.headers.Authorization || data.headers.authorization ? '✅ Found' : '❌ Not found'}</li>
+                    </ul>
+                `);
+                
+                updateSectionStatus('apiSection', 'success');
+            } catch (error) {
+                logResult('apiResults', `❌ Custom Headers Error: ${error.message}`, 'error');
+                updateSectionStatus('apiSection', 'error');
+            }
         }
 
-        // Simulate Gateway Headers
-        function simulateGatewayHeaders() {
-            debugLog('Simulating FDS Gateway headers...');
-            updateSectionStatus('headerSection', 'warning');
-            
-            const mockHeaders = {
-                'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-                'x-forwarded-for': '192.168.1.100',
-                'x-forwarded-proto': 'https',
-                'x-forwarded-host': 'your-app.fds-gateway.com',
-                'x-real-ip': '192.168.1.100',
-                'x-fds-tenant': 'example-tenant',
-                'x-fds-user': 'test-user-123',
-                'x-fds-roles': 'user,viewer',
-                'user-agent': navigator.userAgent,
-                'accept': 'application/json, text/html',
-                'content-type': 'application/json'
-            };
-            
-            let html = '<h4>Simulated FDS Gateway Headers:</h4>';
-            html += '<p><strong>Note:</strong> These are the headers that FDS Gateway would typically add to your requests.</p>';
-            html += '<pre>';
-            Object.entries(mockHeaders).forEach(([key, value]) => {
-                html += `${key}: ${value}\n`;
-            });
-            html += '</pre>';
-            
-            html += '<h5>Header Analysis:</h5>';
-            html += '<ul>';
-            html += '<li>✅ Authorization header with Bearer token</li>';
-            html += '<li>✅ X-Forwarded headers for proxy information</li>';
-            html += '<li>✅ X-FDS custom headers for quick access</li>';
-            html += '<li>✅ Standard HTTP headers preserved</li>';
-            html += '</ul>';
-            
-            document.getElementById('headerResults').innerHTML = html;
-            updateSectionStatus('headerSection', 'success');
-            updateSummaryStatus('header', '✅ Simulated');
-            debugLog('Gateway headers simulation completed', 'success');
+        // Clear API Results
+        function clearAPIResults() {
+            document.getElementById('apiResults').innerHTML = '';
+            updateSectionStatus('apiSection', 'pending');
         }
 
-        // Test CORS
-        function testCORS() {
-            debugLog('Testing CORS configuration...');
+        // Test Network Request
+        function testNetworkRequest() {
+            logResult('manualResults', '🌐 Making network request... Check DevTools Network tab!');
             
-            const testUrls = [
-                'https://httpbin.org/headers',
-                'https://api.github.com',
-                'https://jsonplaceholder.typicode.com/posts/1'
-            ];
-            
-            let html = '<h5>CORS Test Results:</h5>';
-            html += '<ul>';
-            
-            testUrls.forEach(url => {
-                fetch(url, { method: 'HEAD' })
-                    .then(response => {
-                        html += `<li>✅ ${url} - CORS allowed</li>`;
-                        document.getElementById('headerResults').innerHTML += html;
-                    })
-                    .catch(error => {
-                        html += `<li>❌ ${url} - CORS blocked: ${error.message}</li>`;
-                        document.getElementById('headerResults').innerHTML += html;
-                    });
-            });
-            
-            debugLog('CORS tests initiated', 'success');
+            fetch('https://httpbin.org/get?test=network-inspection')
+                .then(response => response.json())
+                .then(data => {
+                    logResult('manualResults', `
+                        <h5>🌐 Network Request Complete:</h5>
+                        <p><strong>✅ Request sent successfully!</strong></p>
+                        <p><strong>Instructions:</strong></p>
+                        <ol>
+                            <li>Open DevTools (F12)</li>
+                            <li>Go to Network tab</li>
+                            <li>Find the request to "httpbin.org/get"</li>
+                            <li>Click on it to see details</li>
+                            <li>Check "Request Headers" section</li>
+                            <li>Look for "Authorization: Bearer ..." header</li>
+                        </ol>
+                        <p><strong>Response data:</strong></p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `);
+                    updateSectionStatus('manualSection', 'success');
+                })
+                .catch(error => {
+                    logResult('manualResults', `❌ Network request failed: ${error.message}`, 'error');
+                    updateSectionStatus('manualSection', 'error');
+                });
         }
 
-        // Test Webhook
-        function testWebhook() {
-            debugLog('Testing webhook endpoint...');
+        // Test with Fetch API
+        function testWithFetch() {
+            logResult('manualResults', '📡 Testing with Fetch API...');
             
-            // Using a public webhook testing service
-            const webhookUrl = 'https://httpbin.org/post';
-            
-            const testData = {
-                source: 'FDS-IAM-Tester',
-                timestamp: new Date().toISOString(),
-                userAgent: navigator.userAgent,
-                url: window.location.href,
-                testHeaders: {
-                    'Authorization': 'Bearer test-token',
-                    'X-FDS-Tenant': 'test-tenant',
-                    'X-FDS-User': 'test-user'
-                }
-            };
-            
-            fetch(webhookUrl, {
+            fetch('https://httpbin.org/post', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer test-token'
+                    'X-Test-Method': 'Fetch-API'
                 },
-                body: JSON.stringify(testData)
+                body: JSON.stringify({
+                    test: 'fetch-api-test',
+                    timestamp: new Date().toISOString()
+                })
             })
             .then(response => response.json())
             .then(data => {
-                let html = '<h5>Webhook Test Results:</h5>';
-                html += '<p>✅ Successfully sent test request to webhook endpoint</p>';
-                html += '<h6>Request Data:</h6>';
-                html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-                
-                document.getElementById('headerResults').innerHTML += html;
-                debugLog('Webhook test completed successfully', 'success');
+                logResult('manualResults', `
+                    <h5>📡 Fetch API Test:</h5>
+                    <p><strong>Method:</strong> POST</p>
+                    <p><strong>Request Headers:</strong></p>
+                    <pre>${JSON.stringify(data.headers, null, 2)}</pre>
+                    <p><strong>Request Body:</strong></p>
+                    <pre>${JSON.stringify(data.json, null, 2)}</pre>
+                    <p><strong>Authorization Header:</strong> ${data.headers.Authorization || data.headers.authorization || 'Not found'}</p>
+                `);
+                updateSectionStatus('manualSection', 'success');
             })
             .catch(error => {
-                debugLog(`Webhook test failed: ${error.message}`, 'error');
+                logResult('manualResults', `❌ Fetch API error: ${error.message}`, 'error');
+                updateSectionStatus('manualSection', 'error');
             });
         }
 
-        // Generate Webhook URL
-        function generateWebhookUrl() {
-            debugLog('Generating webhook URL...');
+        // Test with XMLHttpRequest
+        function testWithXHR() {
+            logResult('manualResults', '🔄 Testing with XMLHttpRequest...');
             
-            const webhookId = 'fds-test-' + Math.random().toString(36).substr(2, 9);
-            const webhookUrl = `https://webhook.site/${webhookId}`;
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'https://httpbin.org/get?method=xhr', true);
+            xhr.setRequestHeader('X-Test-Method', 'XMLHttpRequest');
             
-            document.getElementById('webhookUrlText').textContent = webhookUrl;
-            document.getElementById('webhookUrl').style.display = 'block';
-            
-            debugLog(`Webhook URL generated: ${webhookUrl}`, 'success');
-        }
-
-        // Copy Webhook URL
-        function copyWebhookUrl() {
-            const url = document.getElementById('webhookUrlText').textContent;
-            navigator.clipboard.writeText(url).then(() => {
-                debugLog('Webhook URL copied to clipboard', 'success');
-            });
-        }
-
-        // Start Integration Test
-        function startIntegrationTest() {
-            debugLog('Starting comprehensive integration test...');
-            updateSectionStatus('integrationSection', 'warning');
-            
-            const progressBar = document.getElementById('progressBar');
-            const progressFill = document.getElementById('progressFill');
-            progressBar.style.display = 'block';
-            
-            let progress = 0;
-            const steps = [
-                'Analyzing environment',
-                'Checking security headers',
-                'Validating JWT format',
-                'Testing CORS configuration',
-                'Simulating gateway headers',
-                'Testing webhook endpoint'
-            ];
-            
-            const interval = setInterval(() => {
-                progress += 100 / steps.length;
-                progressFill.style.width = progress + '%';
-                
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        completeIntegrationTest();
-                    }, 500);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    const data = JSON.parse(xhr.responseText);
+                    logResult('manualResults', `
+                        <h5>🔄 XMLHttpRequest Test:</h5>
+                        <p><strong>Status:</strong> ${xhr.status}</p>
+                        <p><strong>Request Headers:</strong></p>
+                        <pre>${JSON.stringify(data.headers, null, 2)}</pre>
+                        <p><strong>Authorization Header:</strong> ${data.headers.Authorization || data.headers.authorization || 'Not found'}</p>
+                    `);
+                    updateSectionStatus('manualSection', 'success');
+                } else {
+                    logResult('manualResults', `❌ XMLHttpRequest failed: ${xhr.status}`, 'error');
+                    updateSectionStatus('manualSection', 'error');
                 }
-            }, 1000);
-            
-            // Run actual tests
-            setTimeout(() => analyzeEnvironment(), 500);
-            setTimeout(() => checkSecurityHeaders(), 1500);
-            setTimeout(() => simulateGatewayHeaders(), 2500);
-            setTimeout(() => testCORS(), 3500);
-        }
-
-        // Complete Integration Test
-        function completeIntegrationTest() {
-            debugLog('Integration test completed', 'success');
-            updateSectionStatus('integrationSection', 'success');
-            updateSummaryStatus('integration', '✅ Completed');
-            
-            const results = document.getElementById('integrationResults');
-            results.innerHTML = `
-                <h4>Integration Test Complete</h4>
-                <p>✅ All tests have been executed successfully.</p>
-                <p><strong>Next Steps:</strong></p>
-                <ol>
-                    <li>Configure FDS Gateway to point to your application</li>
-                    <li>Set up your application endpoints to receive forwarded requests</li>
-                    <li>Implement JWT validation in your application</li>
-                    <li>Test with real FDS Gateway environment</li>
-                </ol>
-            `;
-            
-            document.getElementById('progressBar').style.display = 'none';
-        }
-
-        // Test Full Flow
-        function testFullFlow() {
-            debugLog('Testing full authentication flow...');
-            
-            // This would simulate the full FDS Gateway flow
-            const flowSteps = [
-                'User accesses application',
-                'FDS Gateway intercepts request',
-                'Gateway authenticates user with SiemensID',
-                'Gateway generates JWT token',
-                'Gateway forwards request with Authorization header',
-                'Application validates JWT and processes request'
-            ];
-            
-            let html = '<h4>Full Authentication Flow Simulation:</h4>';
-            html += '<ol>';
-            flowSteps.forEach(step => {
-                html += `<li>${step}</li>`;
-            });
-            html += '</ol>';
-            
-            html += '<p><strong>Current Status:</strong> Testing environment ready for FDS Gateway integration</p>';
-            
-            document.getElementById('integrationResults').innerHTML = html;
-            debugLog('Full flow simulation completed', 'success');
-        }
-
-        // Utility Functions
-        function decodeJWT(token) {
-            try {
-                const parts = token.split('.');
-                if (parts.length !== 3) {
-                    throw new Error('Invalid JWT format - must have 3 parts');
-                }
-                
-                const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
-                const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-                
-                return {
-                    header: header,
-                    payload: payload,
-                    signature: parts[2]
-                };
-            } catch (error) {
-                return { error: error.message };
-            }
-        }
-
-        function clearDebugConsole() {
-            document.getElementById('debugConsole').innerHTML = '<div>Debug console cleared...</div>';
-        }
-
-        function exportResults() {
-            const results = {
-                timestamp: new Date().toISOString(),
-                environment: document.getElementById('envResults').innerHTML,
-                jwt: document.getElementById('jwtResults').innerHTML,
-                headers: document.getElementById('headerResults').innerHTML,
-                integration: document.getElementById('integrationResults').innerHTML,
-                debug: document.getElementById('debugConsole').innerHTML
             };
             
-            const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `fds-iam-test-results-${new Date().toISOString().slice(0, 10)}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
+            xhr.onerror = function() {
+                logResult('manualResults', '❌ XMLHttpRequest error occurred', 'error');
+                updateSectionStatus('manualSection', 'error');
+            };
             
-            debugLog('Test results exported successfully', 'success');
+            xhr.send();
+        }
+
+        // Detect Gateway
+        function detectGateway() {
+            logResult('gatewayResults', '🔍 Detecting FDS Gateway...');
+            updateSectionStatus('gatewaySection', 'warning');
+            
+            // Check for common gateway indicators
+            const indicators = {
+                protocol: window.location.protocol === 'https:',
+                host: window.location.host,
+                userAgent: navigator.userAgent,
+                referrer: document.referrer,
+                cookies: document.cookie
+            };
+            
+            // Test for gateway-specific headers by making a request
+            fetch('https://httpbin.org/headers')
+                .then(response => response.json())
+                .then(data => {
+                    const headers = data.headers;
+                    const gatewayIndicators = [];
+                    
+                    // Check for common gateway headers
+                    if (headers['X-Forwarded-For']) gatewayIndicators.push('✅ X-Forwarded-For header detected');
+                    if (headers['X-Forwarded-Proto']) gatewayIndicators.push('✅ X-Forwarded-Proto header detected');
+                    if (headers['X-Real-IP']) gatewayIndicators.push('✅ X-Real-IP header detected');
+                    if (headers['Authorization']) gatewayIndicators.push('✅ Authorization header detected');
+                    if (headers['X-FDS-Tenant'] || headers['X-FDS-User']) gatewayIndicators.push('✅ FDS-specific headers detected');
+                    
+                    const isLikelyBehindGateway = gatewayIndicators.length > 0;
+                    
+                    logResult('gatewayResults', `
+                        <h5>🔍 Gateway Detection Results:</h5>
+                        <div style="background: ${isLikelyBehindGateway ? '#d4edda' : '#f8d7da'}; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                            <strong>Gateway Status:</strong> ${isLikelyBehindGateway ? '✅ Likely behind a gateway' : '❌ Not detected'}
+                        </div>
+                        <p><strong>Gateway Indicators:</strong></p>
+                        <ul>
+                            ${gatewayIndicators.length > 0 ? gatewayIndicators.map(indicator => `<li>${indicator}</li>`).join('') : '<li>❌ No gateway indicators found</li>'}
+                        </ul>
+                        <p><strong>All Request Headers:</strong></p>
+                        <pre>${JSON.stringify(headers, null, 2)}</pre>
+                    `);
+                    
+                    updateSectionStatus('gatewaySection', isLikelyBehindGateway ? 'success' : 'warning');
+                })
+                .catch(error => {
+                    logResult('gatewayResults', `❌ Gateway detection failed: ${error.message}`, 'error');
+                    updateSectionStatus('gatewaySection', 'error');
+                });
+        }
+
+        // Check Environment
+        function checkEnvironment() {
+            logResult('gatewayResults', '🌍 Checking environment...');
+            
+            const env = {
+                url: window.location.href,
+                protocol: window.location.protocol,
+                host: window.location.host,
+                pathname: window.location.pathname,
+                search: window.location.search,
+                hash: window.location.hash,
+                referrer: document.referrer || 'Direct access',
+                userAgent: navigator.userAgent,
+                language: navigator.language,
+                cookieEnabled: navigator.cookieEnabled,
+                onLine: navigator.onLine,
+                timestamp: new Date().toISOString()
+            };
+            
+            logResult('gatewayResults', `
+                <h5>🌍 Environment Information:</h5>
+                <pre>${JSON.stringify(env, null, 2)}</pre>
+                <p><strong>FDS Gateway Compatibility:</strong></p>
+                <ul>
+                    <li>${env.protocol === 'https:' ? '✅' : '❌'} HTTPS Protocol</li>
+                    <li>${env.cookieEnabled ? '✅' : '❌'} Cookies Enabled</li>
+                    <li>${env.onLine ? '✅' : '❌'} Online Status</li>
+                    <li>${env.referrer !== 'Direct access' ? '✅' : '⚠️'} Referrer Present</li>
+                </ul>
+            `);
+            
+            updateSectionStatus('gatewaySection', 'success');
+        }
+
+        // Test Gateway Features
+        function testGatewayFeatures() {
+            logResult('gatewayResults', '⚡ Testing gateway features...');
+            
+            // Test session management
+            const sessionTest = sessionStorage.getItem('fds-test') || 'not-set';
+            sessionStorage.setItem('fds-test', new Date().toISOString());
+            
+            // Test cookie handling
+            const cookieTest = document.cookie.includes('fds-test');
+            document.cookie = 'fds-test=true; path=/';
+            
+            logResult('gatewayResults', `
+                <h5>⚡ Gateway Features Test:</h5>
+                <p><strong>Session Storage:</strong> ${sessionTest !== 'not-set' ? '✅ Working' : '⚠️ First time'}</p>
+                <p><strong>Cookie Support:</strong> ${navigator.cookieEnabled ? '✅ Enabled' : '❌ Disabled'}</p>
+                <p><strong>Local Storage:</strong> ${typeof(Storage) !== 'undefined' ? '✅ Available' : '❌ Not available'}</p>
+                <p><strong>HTTPS:</strong> ${window.location.protocol === 'https:' ? '✅ Secure' : '❌ Not secure'}</p>
+                <p><strong>Cross-Origin Requests:</strong> Testing...</p>
+            `);
+            
+            // Test CORS
+            fetch('https://httpbin.org/get', { mode: 'cors' })
+                .then(response => {
+                    logResult('gatewayResults', '✅ CORS requests working');
+                    updateSectionStatus('gatewaySection', 'success');
+                })
+                .catch(error => {
+                    logResult('gatewayResults', `❌ CORS test failed: ${error.message}`, 'error');
+                    updateSectionStatus('gatewaySection', 'warning');
+                });
+        }
+
+        // Start Monitoring
+        function startMonitoring() {
+            if (monitoring) return;
+            
+            monitoring = true;
+            logResult('headerMonitor', '▶️ Starting header monitoring...');
+            
+            // Monitor every 5 seconds
+            monitorInterval = setInterval(() => {
+                fetch('https://httpbin.org/headers')
+                    .then(response => response.json())
+                    .then(data => {
+                        const timestamp = new Date().toLocaleTimeString();
+                        const authHeader = data.headers.Authorization || data.headers.authorization;
+                        
+                        logResult('headerMonitor', `
+                            <strong>[${timestamp}] Header Check:</strong>
+                            ${authHeader ? `🔐 Auth: ${authHeader.substring(0, 20)}...` : '❌ No auth header'}
+                        `);
+                    })
+                    .catch(error => {
+                        logResult('headerMonitor', `❌ Monitor error: ${error.message}`, 'error');
+                    });
+            }, 5000);
+            
+            updateSectionStatus('monitorSection', 'success');
+        }
+
+        // Stop Monitoring
+        function stopMonitoring() {
+            if (!monitoring) return;
+            
+            monitoring = false;
+            clearInterval(monitorInterval);
+            logResult('headerMonitor', '⏹️ Monitoring stopped');
+            updateSectionStatus('monitorSection', 'pending');
+        }
+
+        // Clear Monitor
+        function clearMonitor() {
+            document.getElementById('headerMonitor').innerHTML = '<div>Header monitor cleared...</div>';
         }
 
         // Initialize
         window.addEventListener('load', function() {
-            debugLog('FDS IAM Gateway Tester initialized');
-            debugLog('Ready for testing - click buttons to start individual tests');
+            console.log('FDS IAM Header Verification Tool loaded');
+            console.log('Ready to test header forwarding from FDS Gateway');
         });
     </script>
 </body>
