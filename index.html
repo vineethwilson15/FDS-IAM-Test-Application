@@ -14,8 +14,8 @@
 
     <script>
         document.getElementById("testBtn").addEventListener("click", () => {
-            // Use a relative path if the gateway appends this to the base URL.
-            fetch("/echo/headers", {  
+            // Use a relative path (without a leading slash) so it’s appended to /tiaportalcloud-xcdev/
+            fetch("echo/headers", {  
                 method: "GET"
             })
             .then(response => response.json())
