@@ -107,6 +107,30 @@ class OIDCTester {
             this.config.filterProtocolClaims = true;
             this.config.loadUserInfo = this.config.loadUserInfo;
             this.config.automaticSilentRenew = this.config.automaticSilentRenew;
+            
+            // Enable PKCE for better security (especially for Siemens provider)
+            this.config.usePkce = true;
+            
+            // For custom providers that may not have full OIDC discovery
+            if (this.config.authority.includes('cloud.sws.siemens.com')) {
+                this.config.authorization_endpoint = 'https://cloud.sws.siemens.com/oauth/authorize';
+                this.config.token_endpoint = 'https://cloud.sws.siemens.com/oauth/token';
+                this.config.userinfo_endpoint = 'https://cloud.sws.siemens.com/oauth/userinfo';
+                this.config.end_session_endpoint = 'https://cloud.sws.siemens.com/oauth/logout';
+                this.config.jwks_uri = 'https://cloud.sws.siemens.com/.well-known/jwks.json';
+                this.config.issuer = 'https://cloud.sws.siemens.com';
+                
+                // Disable discovery since we're providing explicit endpoints
+                this.config.loadUserInfo = false; // Disable if userinfo endpoint is not available
+                this.config.metadata = {
+                    authorization_endpoint: this.config.authorization_endpoint,
+                    token_endpoint: this.config.token_endpoint,
+                    userinfo_endpoint: this.config.userinfo_endpoint,
+                    end_session_endpoint: this.config.end_session_endpoint,
+                    jwks_uri: this.config.jwks_uri,
+                    issuer: this.config.issuer
+                };
+            }
 
             this.userManager = new oidc.UserManager(this.config);
 
@@ -168,6 +192,23 @@ class OIDCTester {
         if (urlParams.has('code') || urlParams.has('state') || hash.includes('access_token') || hash.includes('id_token')) {
             this.log('Handling authentication callback...');
             
+            // Check for error parameters first
+            if (urlParams.has('error')) {
+                const error = urlParams.get('error');
+                const errorDescription = urlParams.get('error_description');
+                const errorUri = urlParams.get('error_uri');
+                
+                this.log(`OAuth Error: ${error}`, 'error');
+                if (errorDescription) {
+                    this.log(`Error Description: ${errorDescription}`, 'error');
+                }
+                if (errorUri) {
+                    this.log(`Error URI: ${errorUri}`, 'error');
+                }
+                this.updateStatus('OAuth Error', 'danger');
+                return;
+            }
+            
             try {
                 // Initialize with saved config first
                 const saved = localStorage.getItem('oidc-tester-config');
@@ -190,6 +231,17 @@ class OIDCTester {
                 }
             } catch (error) {
                 this.log('Callback error: ' + error.message, 'error');
+                this.log('Error details: ' + JSON.stringify(error, null, 2), 'error');
+                
+                // Additional debugging for token errors
+                if (error.message.includes('token') || error.message.includes('credentials')) {
+                    this.log('Token Error Debug Info:', 'error');
+                    this.log('- Check if redirect_uri matches exactly in your provider', 'error');
+                    this.log('- Verify client_id is correct', 'error');
+                    this.log('- For Siemens: Make sure PKCE is enabled in your OAuth app', 'error');
+                    this.log('- Check if the authorization code is still valid (not expired)', 'error');
+                }
+                
                 this.updateStatus('Callback Error', 'danger');
             }
         }
@@ -198,9 +250,31 @@ class OIDCTester {
     async login() {
         try {
             this.log('Initiating login...');
+            
+            // Debug info for Siemens provider
+            if (this.config && this.config.authority.includes('cloud.sws.siemens.com')) {
+                this.log('Siemens OAuth Debug Info:', 'info');
+                this.log(`- Authority: ${this.config.authority}`, 'info');
+                this.log(`- Client ID: ${this.config.client_id}`, 'info');
+                this.log(`- Redirect URI: ${this.config.redirect_uri}`, 'info');
+                this.log(`- Response Type: ${this.config.response_type}`, 'info');
+                this.log(`- PKCE Enabled: ${this.config.usePkce}`, 'info');
+                this.log(`- Scope: ${this.config.scope}`, 'info');
+            }
+            
             await this.userManager.signinRedirect();
         } catch (error) {
             this.log('Login error: ' + error.message, 'error');
+            this.log('Error details: ' + JSON.stringify(error, null, 2), 'error');
+            
+            // Specific troubleshooting for Siemens
+            if (this.config && this.config.authority.includes('cloud.sws.siemens.com')) {
+                this.log('Siemens Troubleshooting Tips:', 'warning');
+                this.log('1. Ensure your redirect URI exactly matches what is registered in Siemens OAuth app', 'warning');
+                this.log('2. Make sure the client ID is correct: tiacloudservices1-xcdev-authcode', 'warning');
+                this.log('3. Check if your OAuth app supports PKCE (recommended for SPA)', 'warning');
+                this.log('4. Verify your application has proper permissions', 'warning');
+            }
         }
     }
 
@@ -442,6 +516,11 @@ window.loadPreset = function(provider) {
             authority: 'https://{your-keycloak-domain}/auth/realms/{realm}',
             scope: 'openid profile email',
             responseType: 'code'
+        },
+        siemens: {
+            authority: 'https://cloud.sws.siemens.com',
+            scope: 'openid profile email',
+            responseType: 'code'
         }
     };
 
@@ -451,10 +530,16 @@ window.loadPreset = function(provider) {
         document.getElementById('scope').value = preset.scope;
         document.getElementById('responseType').value = preset.responseType;
         
+        // Special handling for Siemens
+        if (provider === 'siemens') {
+            document.getElementById('clientId').value = 'tiacloudservices1-xcdev-authcode';
+            document.getElementById('loadUserInfo').checked = false;
+        }
+        
         // Show helpful info
         const tester = window.oidcTester;
         if (tester) {
-            tester.log(`Loaded ${provider.toUpperCase()} preset. Please update the authority URL with your specific values.`, 'info');
+            tester.log(`Loaded ${provider.toUpperCase()} preset. ${provider === 'siemens' ? 'Siemens-specific configuration applied.' : 'Please update the authority URL with your specific values.'}`, 'info');
         }
     }
 };

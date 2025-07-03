@@ -111,6 +111,58 @@
                             <button class="btn btn-outline-secondary btn-sm" onclick="loadPreset('keycloak')">
                                 <i class="fas fa-key me-2"></i>Keycloak
                             </button>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="loadPreset('siemens')">
+                                <i class="fas fa-industry me-2"></i>Siemens
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Troubleshooting Tips -->
+                <div class="card mt-3">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Troubleshooting Tips</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="accordion" id="troubleshootingAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="siemensHelp">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#siemensCollapse" aria-expanded="false">
+                                        <i class="fas fa-industry me-2"></i>Siemens OAuth Issues
+                                    </button>
+                                </h2>
+                                <div id="siemensCollapse" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                                    <div class="accordion-body">
+                                        <small>
+                                            <strong>Common Issues:</strong><br>
+                                            • <strong>Bad Credentials:</strong> Check redirect URI matches exactly<br>
+                                            • <strong>Client ID:</strong> Use "tiacloudservices1-xcdev-authcode"<br>
+                                            • <strong>Authority:</strong> Use "https://cloud.sws.siemens.com"<br>
+                                            • <strong>PKCE:</strong> Enable for better security<br>
+                                            • <strong>Scope:</strong> Try "openid" or check required scopes
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="generalHelp">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#generalCollapse" aria-expanded="false">
+                                        <i class="fas fa-question-circle me-2"></i>General OAuth Issues
+                                    </button>
+                                </h2>
+                                <div id="generalCollapse" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                                    <div class="accordion-body">
+                                        <small>
+                                            <strong>Check these common issues:</strong><br>
+                                            • Redirect URI must match exactly (including protocol)<br>
+                                            • Client ID must be correct<br>
+                                            • Make sure your OAuth app allows your redirect URI<br>
+                                            • Check if CORS is properly configured<br>
+                                            • Verify your OAuth app supports the chosen flow
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
