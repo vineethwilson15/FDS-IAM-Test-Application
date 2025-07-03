@@ -39,7 +39,7 @@ class OIDCTester {
         document.getElementById('copyResults').addEventListener('click', () => this.copyResults());
 
         // Auto-save configuration
-        ['authority', 'clientId', 'scope', 'responseType'].forEach(id => {
+        ['authority', 'clientId', 'clientSecret', 'scope', 'responseType'].forEach(id => {
             document.getElementById(id).addEventListener('input', () => this.saveConfig());
         });
         
@@ -75,6 +75,7 @@ class OIDCTester {
         return {
             authority: document.getElementById('authority').value,
             client_id: document.getElementById('clientId').value,
+            client_secret: document.getElementById('clientSecret').value,
             redirect_uri: document.getElementById('redirectUri').value,
             scope: document.getElementById('scope').value,
             response_type: document.getElementById('responseType').value,
@@ -86,6 +87,7 @@ class OIDCTester {
     setConfigToForm(config) {
         document.getElementById('authority').value = config.authority || '';
         document.getElementById('clientId').value = config.client_id || '';
+        document.getElementById('clientSecret').value = config.client_secret || '';
         document.getElementById('scope').value = config.scope || 'openid profile email';
         document.getElementById('responseType').value = config.response_type || 'code';
         document.getElementById('loadUserInfo').checked = config.loadUserInfo || false;
@@ -108,8 +110,20 @@ class OIDCTester {
             this.config.loadUserInfo = this.config.loadUserInfo;
             this.config.automaticSilentRenew = this.config.automaticSilentRenew;
             
-            // Enable PKCE for better security (especially for Siemens provider)
-            this.config.usePkce = true;
+            // Determine client type and authentication method
+            const hasClientSecret = this.config.client_secret && this.config.client_secret.trim() !== '';
+            
+            if (hasClientSecret) {
+                // Confidential client - use client secret
+                this.config.client_authentication = 'client_secret_post';
+                this.config.usePkce = false; // Don't use PKCE when we have client secret
+                this.log('Using confidential client with client secret', 'info');
+            } else {
+                // Public client - use PKCE
+                this.config.usePkce = true;
+                delete this.config.client_secret; // Remove empty client secret
+                this.log('Using public client with PKCE', 'info');
+            }
             
             // For custom providers that may not have full OIDC discovery
             if (this.config.authority.includes('cloud.sws.siemens.com')) {
@@ -256,9 +270,11 @@ class OIDCTester {
                 this.log('Siemens OAuth Debug Info:', 'info');
                 this.log(`- Authority: ${this.config.authority}`, 'info');
                 this.log(`- Client ID: ${this.config.client_id}`, 'info');
+                this.log(`- Client Secret: ${this.config.client_secret ? 'Present' : 'Not provided'}`, 'info');
                 this.log(`- Redirect URI: ${this.config.redirect_uri}`, 'info');
                 this.log(`- Response Type: ${this.config.response_type}`, 'info');
                 this.log(`- PKCE Enabled: ${this.config.usePkce}`, 'info');
+                this.log(`- Client Authentication: ${this.config.client_authentication || 'default'}`, 'info');
                 this.log(`- Scope: ${this.config.scope}`, 'info');
             }
             
@@ -519,6 +535,8 @@ window.loadPreset = function(provider) {
         },
         siemens: {
             authority: 'https://cloud.sws.siemens.com',
+            client_id: 'tiacloudservices1-xcdev-authcode',
+            client_secret: 'cr28grVlDykUNHupPorM23GrvNUxuS0NP8FMZN9NmB5',
             scope: 'openid profile email',
             responseType: 'code'
         }
@@ -530,16 +548,23 @@ window.loadPreset = function(provider) {
         document.getElementById('scope').value = preset.scope;
         document.getElementById('responseType').value = preset.responseType;
         
+        // Set client credentials if available
+        if (preset.client_id) {
+            document.getElementById('clientId').value = preset.client_id;
+        }
+        if (preset.client_secret) {
+            document.getElementById('clientSecret').value = preset.client_secret;
+        }
+        
         // Special handling for Siemens
         if (provider === 'siemens') {
-            document.getElementById('clientId').value = 'tiacloudservices1-xcdev-authcode';
             document.getElementById('loadUserInfo').checked = false;
         }
         
         // Show helpful info
         const tester = window.oidcTester;
         if (tester) {
-            tester.log(`Loaded ${provider.toUpperCase()} preset. ${provider === 'siemens' ? 'Siemens-specific configuration applied.' : 'Please update the authority URL with your specific values.'}`, 'info');
+            tester.log(`Loaded ${provider.toUpperCase()} preset. ${provider === 'siemens' ? 'Siemens-specific configuration applied with client secret.' : 'Please update the authority URL with your specific values.'}`, 'info');
         }
     }
 };

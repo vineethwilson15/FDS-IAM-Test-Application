@@ -47,6 +47,12 @@
                             </div>
                             
                             <div class="mb-3">
+                                <label for="clientSecret" class="form-label">Client Secret</label>
+                                <input type="password" class="form-control" id="clientSecret" placeholder="your-client-secret">
+                                <div class="form-text">Leave empty for public clients (PKCE). Required for confidential clients.</div>
+                            </div>
+                            
+                            <div class="mb-3">
                                 <label for="redirectUri" class="form-label">Redirect URI</label>
                                 <input type="url" class="form-control" id="redirectUri" readonly>
                                 <div class="form-text">Current page URL (auto-filled)</div>
@@ -135,10 +141,12 @@
                                     <div class="accordion-body">
                                         <small>
                                             <strong>Common Issues:</strong><br>
-                                            • <strong>Bad Credentials:</strong> Check redirect URI matches exactly<br>
-                                            • <strong>Client ID:</strong> Use "tiacloudservices1-xcdev-authcode"<br>
-                                            • <strong>Authority:</strong> Use "https://cloud.sws.siemens.com"<br>
-                                            • <strong>PKCE:</strong> Enable for better security<br>
+                                            • <strong>Bad Credentials:</strong> This client requires a client secret<br>
+                                            • <strong>Client ID:</strong> "tiacloudservices1-xcdev-authcode"<br>
+                                            • <strong>Client Secret:</strong> "cr28grVlDykUNHupPorM23GrvNUxuS0NP8FMZN9NmB5"<br>
+                                            • <strong>Authority:</strong> "https://cloud.sws.siemens.com"<br>
+                                            • <strong>Redirect URI:</strong> Must match exactly in OAuth app<br>
+                                            • <strong>Flow:</strong> Authorization Code with client secret (not PKCE)<br>
                                             • <strong>Scope:</strong> Try "openid" or check required scopes
                                         </small>
                                     </div>
